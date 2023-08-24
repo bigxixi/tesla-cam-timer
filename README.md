@@ -12,7 +12,7 @@
 
 可以在电脑也可以在手机使用本工具。[▶️视频操作演示](https://www.bilibili.com/video/BV1Pu4y1D7ND/)   
 如果是电脑，直接将U盘插入电脑，然后从步骤4开始看；  
-如果是手机：  
+如果是手机，请使用手机浏览器（Safari/Chrome），微信等APP直接打开链接有可能无法使用：  
 1.根据手机类型（安卓、苹果）准备好OTG转接头。 
 
 <p align="left">
@@ -36,4 +36,5 @@
 `iPhone（Safari）生成的是mp4格式，安卓（Chrome，edge）生成的是webm，如需转换为mp4，可以搜索一些在线工具或者app，例如` 
 https://converter.app/webm-to-mp4/
 
-
+### 源码
+源码全都在`index.html`一个文件里，没有服务端设置，下载到本地双击打开就可以使用，主要利用了canvas.captureStream()和mediaRecorder调用浏览器原生的能力来生成视频，因此不同浏览器生成的视频格式不一样，iPhone（Safari）生成的是mp4格式，安卓（Chrome，edge）生成的是webm，另外手机性能会影响生成视频的流畅程度（主流手机应该没啥问题，老旧低端机会卡顿）
