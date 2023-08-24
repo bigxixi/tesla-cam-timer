@@ -1,0 +1,199 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特斯拉行车记录仪加水印</title>
+</head>
+<body>
+     
+    <h3>特斯拉行车记录仪加水印（测试）</h3>
+    <div>注意文件名不要改</div>
+    <hr color="#666666">
+    <input class="inputer" type="file" id="file" />
+    <br />
+    ------
+    <br/>
+    <button class="startRec" disabled="true">开始录制</button>
+    <button class="stopRec" disabled="true">结束并下载录像</button>
+    <br/>
+    <div class="info" style="opacity: 0;">录制信息</div>
+    <video class="video_stage" autoplay playsInline style="display: none;">
+        你的浏览器不能支持HTML5视频
+    </video>
+
+    <!-- <div style="width: 100vw;"> -->
+        <canvas class="cvs" style="width: 90vw;top:50vw;left:5vw;position:absolute;"></canvas>
+    <!-- </div> -->
+    
+
+    <script>
+        const inputer = document.querySelector(".inputer");
+        const startRec = document.querySelector(".startRec");
+        const stopRec = document.querySelector(".stopRec");
+        const info = document.querySelector(".info");
+        const cvs = document.querySelector(".cvs");
+        const ctx = cvs.getContext('2d');
+        const vid = document.querySelector(".video_stage");
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let recStartTime = 0;
+        let vidName = "";
+
+        let mimeType = {ext:"webm",opt:{mimeType: 'video/webm'}};
+        if (MediaRecorder.isTypeSupported('video/webm; codecs=vp9')) {
+            mimeType = {ext:"webm",opt:{mimeType: 'video/webm; codecs=vp9'}};
+        } else  if (MediaRecorder.isTypeSupported('video/webm')) {
+            mimeType = {ext:"webm",opt:{mimeType: 'video/webm'}};
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+            mimeType = {ext:"mp4",opt:{mimeType: 'video/mp4', videoBitsPerSecond : 10000000}};
+        } else {
+            // const mimeType = {mimeType: 'video/webm'};
+            console.error("no suitable mimetype found for this device");
+        }
+
+        const allChunks=[];
+        const stream = cvs.captureStream(25);
+        const recorder = new MediaRecorder(stream, mimeType.opt);
+        
+              recorder.ondataavailable = e => {
+                    console.log("TCL: e", e)
+                    allChunks.push(
+                        e.data
+                    );
+                }
+
+         //end & download
+        function stopAndblobDownload() {
+            recorder.stop();
+            vid.pause();
+            stopRec.disabled = true;
+
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            const fullBlob = new Blob(allChunks);
+            const downloadUrl = window.URL.createObjectURL(fullBlob);
+            link.href = downloadUrl;
+            link.download = `${vidName}_${Math.random()}.${mimeType.ext}`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+        //start
+        function startRecording(){
+            if(vid.paused){
+                vid.play();
+            }
+            recorder.start(10);
+            stopRec.disabled = false;
+            info.style = "opacity:1"
+            recStartTime = vid.currentTime;
+            console.log("recStartTime",recStartTime)
+        }
+
+        startRec.addEventListener("click",startRecording);
+        stopRec.addEventListener("click",stopAndblobDownload);
+
+        Date.prototype.format = function(fmt) { 
+            var o = { 
+            "M+" : this.getMonth()+1,                 //月份 
+            "d+" : this.getDate(),                    //日 
+            "h+" : this.getHours(),                   //小时 
+            "m+" : this.getMinutes(),                 //分 
+            "s+" : this.getSeconds(),                 //秒 
+            "q+" : Math.floor((this.getMonth()+3)/3), //季度 
+            "S" : this.getMilliseconds()             //毫秒 
+            }; 
+            if(/(y+)/.test(fmt)) {
+            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+            }
+            for(var k in o) {
+            if(new RegExp("("+ k +")").test(fmt)){
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+            }
+            }
+            return fmt; 
+        }
+
+        
+
+        const inputVid = ()=> {
+            const file = document.getElementById('file').files[0];
+            const url = URL.createObjectURL(file);
+            vidName = file.name.split(0,file.name.lastIndexOf("."));
+            const t1 = file.name.slice(0,19).split("_");
+            const t2 = t1[0].split("-");
+            const t3 = t1[1].split("-");
+
+            const oldTime = `${t2[0]}/${t2[1]}/${t2[2]} ${t3[0]}:${t3[1]}:${t3[2]}`;
+            console.log("oldTime",oldTime);
+
+            const startTime = (new Date(oldTime)).getTime();//毫秒
+            console.log("startTime",startTime);   
+
+            vid.src = url;
+            vid.play();
+            
+
+            vid.addEventListener("loadedmetadata",()=>{
+
+                cvs.width = vid.videoWidth;
+                cvs.height = vid.videoHeight;
+
+                
+                startRec.disabled = false;
+
+                if(isMobile){
+                    const touchToPlay = ()=>{
+                        vid.play();
+                        cvs.removeEventListener("touchstart",touchToPlay);
+                    }
+
+                    cvs.addEventListener("touchstart",touchToPlay)
+                }
+
+                ctx.font = `${cvs.width/30}px Arial`;
+                let startTimeTemp = startTime+recStartTime*1000;
+                console.log("startTimeTemp",startTimeTemp)
+                const render = ()=>{
+                    ctx.clearRect(0,0,cvs.width,cvs.height);
+                    ctx.drawImage(vid, 0, 0,cvs.width,cvs.height);
+                    const curTime = new Date(startTime+vid.currentTime*1000).format("yyyy-MM-dd hh:mm:ss");
+                    const curTextBBox = ctx.measureText(curTime);
+                    const tW = curTextBBox.width;
+                    const tH = curTextBBox.fontBoundingBoxAscent + curTextBBox.fontBoundingBoxDescent;
+
+                    // const tX = (cvs.width - tW)/2;//居中
+                    const tX = cvs.width - tW - cvs.width/50;//靠右
+                    // const tX = cvs.width/20;//靠左
+
+                    const tY = cvs.height - cvs.width/45;
+
+                                    
+                    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                    ctx.fillRect(tX,tY - curTextBBox.fontBoundingBoxAscent,tW,tH);
+
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.fillText(curTime, tX, tY);
+
+                    
+                    info.innerHTML = `录制开始时间：${new Date(startTimeTemp).format("yyyy-MM-dd hh:mm:ss")},已录制${(vid.currentTime - recStartTime).toFixed(2)}s`
+                    requestAnimationFrame(render);
+
+
+                }
+
+                render()
+
+        })
+
+            
+
+            
+        }
+
+        
+        
+        inputer.addEventListener("change",inputVid)
+ 
+    </script>
+</body>
+</html>
