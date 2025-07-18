@@ -38,4 +38,4 @@
 https://converter.app/webm-to-mp4/
 
 ### 源码
-源码全都在`index.html`一个文件里，没有服务端设置，下载到本地双击打开就可以使用，主要利用了canvas.captureStream()和mediaRecorder调用浏览器原生的能力来生成视频，因此不同浏览器生成的视频格式不一样，iPhone（Safari）生成的是mp4格式，安卓（Chrome，edge）生成的是webm，另外手机性能会影响生成视频的流畅程度（主流手机应该没啥问题，老旧低端机会卡顿）
+源码全都在`index.html`一个文件里，没有服务端设置，下载到本地双击打开就可以使用，主要利用了canvas.captureStream()和mediaRecorder调用浏览器原生的能力来生成视频，因此不同浏览器生成的视频格式不一样，iPhone（Safari）生成的是 mp4 格式（如果 Safari 生成过程卡顿，考虑下一个 Chrome 试试），部分安卓（Chrome，edge）生成的是 webm（新版可能是 mp4 ，未测试），另外手机性能会影响生成视频的流畅程度（主流手机应该没啥问题，老旧低端机会卡顿）
