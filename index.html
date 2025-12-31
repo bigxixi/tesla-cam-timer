@@ -1,60 +1,56 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>特斯拉行车记录仪加水印</title>
     <style>
-        div{
+        div {
             font-size: 10px;
-        } 
+        }
     </style>
 </head>
 <body">
-     
+
     <h3>特斯拉行车记录仪加水印 v1.1</h3>
     <div>
-        使用步骤：<br/>
-        可以在电脑也可以在手机使用本工具。<br/>
-        如果是电脑，直接将U盘插入电脑，然后从步骤4开始看；<br/>
-        如果是手机：<br/>
-        1.根据手机类型（安卓、苹果）准备好OTG转接头。<br/>
-        2.取下行车记录仪U盘，插入转接头连上手机。<br/>
-        3.打开文件管理器确认U盘是否链接成功。<span style="color: rgb(255, 128, 0)">注意:视频文件名不要改!</span><br/>
-        4.点击「选择文件」，进入特斯拉U盘选取视频片段。特斯拉记录的视频是每个片段1分钟。<br/>
-        5.点击「开始录制」，等待录制（可以滑动进度条到对应时间点再开始）。<br/>
-        6.点击「结束录制并下载视频」完成录制。<br/>
-        7.点击浏览器的下载列表，可以看到刚才录制的视频。<br/>
-        <span style="color: rgb(255, 128, 0);">iPhone（Safari）生成的是mp4格式，部分安卓（Chrome，edge）生成的是webm，如需转换为mp4，可以搜索一些在线工具或者app，例如</span>
+        使用步骤：<br />
+        可以在电脑也可以在手机使用本工具。<br />
+        如果是电脑，直接将U盘插入电脑，然后从步骤4开始看；<br />
+        如果是手机：<br />
+        1.根据手机类型（安卓、苹果）准备好OTG转接头。<br />
+        2.取下行车记录仪U盘，插入转接头连上手机。<br />
+        3.打开文件管理器确认U盘是否链接成功。<span style="color: rgb(255, 128, 0)">注意:视频文件名不要改!</span><br />
+        4.点击「选择文件」，进入特斯拉U盘选取视频片段。特斯拉记录的视频是每个片段1分钟。<br />
+        5.点击「开始录制」，等待录制（可以滑动进度条到对应时间点再开始）。<br />
+        6.点击「结束录制并下载视频」完成录制。<br />
+        7.点击浏览器的下载列表，可以看到刚才录制的视频。<br />
+        <span
+            style="color: rgb(255, 128, 0);">iPhone（Safari）生成的是mp4格式，部分安卓（Chrome，edge）生成的是webm，如需转换为mp4，可以搜索一些在线工具或者app，例如</span>
         <a href="https://converter.app/webm-to-mp4/">https://converter.app/webm-to-mp4/</a>
     </div>
-    
+
     <hr color="#666666">
     <input class="inputer" type="file" />
-    <br/>
-    <br/>
+    <br />
+    <br />
     <button class="startRec" disabled="true">🔴录制水印视频</button>
     <button class="stopRec" disabled="true">🟥结束录制，并下载视频</button>
-    <br/>
-    <br/>
+    <br />
+    <br />
     <div class="info" style="color:grey;"> ⏸ 未开始录制。</div>
-    <br/>
+    <br />
     <div class="viewer" style="display: none;">
         <canvas class="cvs" style="width: 100%;"></canvas>
-        <br/>
-        <input class="timeLine" 
-               type="range" 
-               min="1"
-               max="100"
-               step="0.01"
-               value="0"
-               style="width: 100%;"
-               />
+        <br />
+        <input class="timeLine" type="range" min="1" max="100" step="0.01" value="0" style="width: 100%;" />
     </div>
 
     <div>
-        <img width="15px" style="margin: -3px;" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="">
+        <img width="15px" style="margin: -3px;"
+            src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="">
         <span style="line-height: 10px;"> 项目地址:</span>
-        <br/>
+        <br />
         <a href="https://github.com/bigxixi/tesla-cam-timer">https://github.com/bigxixi/tesla-cam-timer</a>
     </div>
 
@@ -76,51 +72,51 @@
         const cvs = viewer.querySelector(".cvs");
         const ctx = cvs.getContext('2d');
         const vid = document.createElement("video");
-              vid.setAttribute("autoplay",true);
-              vid.setAttribute("playsInline",true);
+        vid.setAttribute("autoplay", true);
+        vid.setAttribute("playsInline", true);
 
         let draging = false;//拖拽状态控制
-        
+
         // safari(iOS)支持mp4导出，部分chrome(Android)支持webm，可能需要转换一下
         const mimeTypeList = [
-                ['video/mp4; codecs=avc1','mp4'],
-                ['video/mp4','mp4'],
-                ['video/webm; codecs=vp9','webm'],
-                ['video/webm','webm']
-            ];
+            ['video/mp4; codecs=avc1', 'mp4'],
+            ['video/mp4', 'mp4'],
+            ['video/webm; codecs=vp9', 'webm'],
+            ['video/webm', 'webm']
+        ];
 
         const getMimeType = bitRate => {
-              const curType = mimeTypeList.find(type => MediaRecorder.isTypeSupported(type[0]));
-              if(curType !== undefined ){
-                return {ext:curType[1],opt:{mimeType: curType[0], videoBitsPerSecond : bitRate}};
-              } else {
+            const curType = mimeTypeList.find(type => MediaRecorder.isTypeSupported(type[0]));
+            if (curType !== undefined) {
+                return { ext: curType[1], opt: { mimeType: curType[0], videoBitsPerSecond: bitRate } };
+            } else {
                 console.error("设备浏览器不支持 mp4 或者 webm 视频录制");
-                return {ext:'mp4',opt:{mimeType:'video/mp4', videoBitsPerSecond : bitRate}};
-              }
-              
+                return { ext: 'mp4', opt: { mimeType: 'video/mp4', videoBitsPerSecond: bitRate } };
+            }
+
         }
 
-        const mimeType =  getMimeType(bitRate);
+        const mimeType = getMimeType(bitRate);
         // 时间日期格式化
-        Date.prototype.format = function(fmt){ 
-            var o = { 
-            "M+" : this.getMonth()+1,                 //月份 
-            "d+" : this.getDate(),                    //日 
-            "h+" : this.getHours(),                   //小时 
-            "m+" : this.getMinutes(),                 //分 
-            "s+" : this.getSeconds(),                 //秒 
-            "q+" : Math.floor((this.getMonth()+3)/3), //季度 
-            "S" : this.getMilliseconds()             //毫秒 
-            }; 
-            if(/(y+)/.test(fmt)) {
-            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+        Date.prototype.format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,                 //月份 
+                "d+": this.getDate(),                    //日 
+                "h+": this.getHours(),                   //小时 
+                "m+": this.getMinutes(),                 //分 
+                "s+": this.getSeconds(),                 //秒 
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+                "S": this.getMilliseconds()             //毫秒 
+            };
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
             }
-            for(var k in o) {
-            if(new RegExp("("+ k +")").test(fmt)){
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                }
             }
-            }
-            return fmt; 
+            return fmt;
         }
 
         // 利用captureStream获取canvas内容生成视频，详见
@@ -128,98 +124,108 @@
         const allChunks = [];
         const stream = cvs.captureStream(fps);
         const recorder = new MediaRecorder(stream, mimeType.opt);
-                recorder.ondataavailable = e => {
-                    allChunks.push(
-                        e.data
-                    );
-                }
+        recorder.onstop = (e) => {
+            console.log("--录制完全结束，开始生成文件--");
+            const fullBlob = new Blob(allChunks, { type: mimeType.opt.mimeType });
+            const downloadUrl = window.URL.createObjectURL(fullBlob);
+
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            link.href = downloadUrl;
+            // 生成带随机数的文件名
+            link.download = `${vidName}_watermarked_${new Date().getTime()}.${mimeType.ext}`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            // 清理工作
+            setTimeout(() => {
+                link.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+                allChunks.length = 0; // 清空数据，为下一次录制做准备
+                console.log("--下载流程结束--");
+            }, 100);
+        };
+        recorder.ondataavailable = e => {
+            allChunks.push(
+                e.data
+            );
+        }
         let vidName = "unNamed";
         let startTime = 0;
         let recStartTime = 0;
         let recStartTimeNew = 0;
 
         //开始录制带水印视频
-        const startRecording = ()=>{
-                // 若视频停在最后一帧，则重新开始播放
-                if(vid.currentTime>=vid.duration) vid.currentTime = 0;
-                if(vid.paused) vid.play();
-        
-                info.style.color = "red";
+        const startRecording = () => {
+            // 若视频停在最后一帧，则重新开始播放
+            if (vid.currentTime >= vid.duration) vid.currentTime = 0;
+            if (vid.paused) vid.play();
 
-                recorder.start(timeslice);
-                stopRec.disabled = false;
-                startRec.disabled = true;
-                recStartTime = vid.currentTime;
-                recStartTimeNew = startTime+recStartTime*1000;
-                console.log("--录制开始--");
-                
-            }
+            info.style.color = "red";
+
+            recorder.start(timeslice);
+            stopRec.disabled = false;
+            startRec.disabled = true;
+            recStartTime = vid.currentTime;
+            recStartTimeNew = startTime + recStartTime * 1000;
+            console.log("--录制开始--");
+
+        }
 
         //保存录制的视频
-        const stopAndblobDownload = ()=>{
-                recorder.stop();
-                vid.pause();
-                stopRec.disabled = true;
-                startRec.disabled = false;
+        const stopAndblobDownload = () => {
+            recorder.stop(); // 这一步会触发上面的 recorder.onstop
+            vid.pause();
+            stopRec.disabled = true;
+            startRec.disabled = false;
 
-                info.innerHTML = "录制停止。"
-                info.style.color = "grey";
+            info.innerHTML = "录制停止，正在处理文件...";
+            info.style.color = "grey";
+        }
 
-                console.log("--录制流程结束，开始下载流程--");
+        startRec.addEventListener("click", startRecording);
+        stopRec.addEventListener("click", stopAndblobDownload);
 
-                const fullBlob = new Blob(allChunks);
-                const downloadUrl = window.URL.createObjectURL(fullBlob);
 
-                const link = document.createElement('a');
-                      link.style.display = 'none';
-                      link.href = downloadUrl;
-                      link.download = `${vidName}_${Math.random().toFixed(10)*10000000000}.${mimeType.ext}`;
-
-                document.body.appendChild(link);
-                link.click();
-
-                setTimeout(() => {
-                    link.remove();
-                    allChunks.length = 0;
-                    console.log("--下载流程结束--");
-                }, 100);
-                
+        vid.addEventListener('ended', () => {
+            // 只有在正在录制的状态下，才触发自动停止
+            if (recorder.state === "recording") {
+                console.log("检测到视频播放结束，自动停止录制...");
+                stopAndblobDownload();
             }
-
-        startRec.addEventListener("click",startRecording);
-        stopRec.addEventListener("click",stopAndblobDownload);
-
+        });
 
         // 播放原视频，绘制到canvas上，并添加时间码水印
-        const renderLoop = ()=>{
-                    requestAnimationFrame(renderLoop);
+        const renderLoop = () => {
+            requestAnimationFrame(renderLoop);
 
-                    ctx.clearRect(0,0,cvs.width,cvs.height);
-                    ctx.drawImage(vid, 0, 0,cvs.width,cvs.height);
-                    const curTime = new Date(startTime+vid.currentTime*1000).format("yyyy-MM-dd hh:mm:ss");
-                    const curTextBBox = ctx.measureText(curTime);
-                    const tW = curTextBBox.width;
-                    const tH = curTextBBox.fontBoundingBoxAscent + curTextBBox.fontBoundingBoxDescent;
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            ctx.drawImage(vid, 0, 0, cvs.width, cvs.height);
+            const curTime = new Date(startTime + vid.currentTime * 1000).format("yyyy-MM-dd hh:mm:ss");
+            const curTextBBox = ctx.measureText(curTime);
+            const tW = curTextBBox.width;
+            const tH = curTextBBox.fontBoundingBoxAscent + curTextBBox.fontBoundingBoxDescent;
 
-                    // const tX = (cvs.width - tW)/2;//居中
-                    const tX = cvs.width - tW - cvs.width/50;//靠右
-                    // const tX = cvs.width/20;//靠左
+            // const tX = (cvs.width - tW)/2;//居中
+            const tX = cvs.width - tW - cvs.width / 50;//靠右
+            // const tX = cvs.width/20;//靠左
 
-                    const tY = cvs.height - cvs.width/45;
+            const tY = cvs.height - cvs.width / 45;
 
-                    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                    ctx.fillRect(tX,tY - curTextBBox.fontBoundingBoxAscent,tW,tH);
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(tX, tY - curTextBBox.fontBoundingBoxAscent, tW, tH);
 
-                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                    ctx.fillText(curTime, tX, tY);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText(curTime, tX, tY);
 
-                    if(!draging && vid.duration && vid.duration !=0) timeLine.value = 100*(vid.currentTime/vid.duration);
-                    if(recorder.state == "recording") info.innerHTML = `录制开始时间：${new Date(recStartTimeNew).format("yyyy-MM-dd hh:mm:ss")},已录制${(vid.currentTime - recStartTime).toFixed(2)}s`;
-                    
-                }
+            if (!draging && vid.duration && vid.duration != 0) timeLine.value = 100 * (vid.currentTime / vid.duration);
+            if (recorder.state == "recording") info.innerHTML = `录制开始时间：${new Date(recStartTimeNew).format("yyyy-MM-dd hh:mm:ss")},已录制${(vid.currentTime - recStartTime).toFixed(2)}s`;
+
+        }
 
         // 选择视频后开始播放
-        const inputVid = ()=> {
+        const inputVid = () => {
             // todo:
             // 文件名合法性检测
 
@@ -227,10 +233,10 @@
             info.style.color = "grey";
 
             const file = inputer.files[0];
-            vidName = file.name.substring(0,file.name.lastIndexOf("."));
+            vidName = file.name.substring(0, file.name.lastIndexOf("."));
 
             const url = URL.createObjectURL(file);
-            const t1 = file.name.slice(0,19).split("_");
+            const t1 = file.name.slice(0, 19).split("_");
             const t2 = t1[0].split("-");
             const t3 = t1[1].split("-");
 
@@ -239,46 +245,47 @@
 
             vid.src = url;
             // vid.play();
-            if(vid.paused) vid.play();
+            if (vid.paused) vid.play();
 
-            vid.addEventListener("loadedmetadata",()=>{
+            vid.addEventListener("loadedmetadata", () => {
 
                 cvs.width = vid.videoWidth;
                 cvs.height = vid.videoHeight;
 
                 viewer.style.display = "block";
-                
+
                 startRec.disabled = false;
 
-                if(isMobile){
-                    const touchToPlay = ()=>{
+                if (isMobile) {
+                    const touchToPlay = () => {
                         // vid.play();
-                        if(vid.paused) vid.play();
-                        cvs.removeEventListener("touchstart",touchToPlay);
+                        if (vid.paused) vid.play();
+                        cvs.removeEventListener("touchstart", touchToPlay);
                     }
 
-                    cvs.addEventListener("touchstart",touchToPlay)
+                    cvs.addEventListener("touchstart", touchToPlay)
                 }
 
-                ctx.font = `${cvs.width/30}px Arial`;
-                recStartTimeNew = startTime+recStartTime*1000;
+                ctx.font = `${cvs.width / 30}px Arial`;
+                recStartTimeNew = startTime + recStartTime * 1000;
 
                 requestAnimationFrame(renderLoop);
 
             })
-            
+
         }
 
-        inputer.addEventListener("change",inputVid);
+        inputer.addEventListener("change", inputVid);
 
         // 进度条控制
-        timeLine.addEventListener(isMobile?"touchstart":"mousedown",e=>{draging=true;})
-        timeLine.addEventListener(isMobile?"touchend":"mouseup",e=>{draging=false;})
-        timeLine.addEventListener("change",()=>{
-            vid.currentTime = vid.duration*timeLine.value/timeLine.max;
-            if(vid.paused) vid.play();
+        timeLine.addEventListener(isMobile ? "touchstart" : "mousedown", e => { draging = true; })
+        timeLine.addEventListener(isMobile ? "touchend" : "mouseup", e => { draging = false; })
+        timeLine.addEventListener("change", () => {
+            vid.currentTime = vid.duration * timeLine.value / timeLine.max;
+            if (vid.paused) vid.play();
         });
- 
+
     </script>
-</body>
+    </body>
+
 </html>
