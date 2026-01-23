@@ -56,9 +56,9 @@
 
     <script>
 
-        const fps = 25;//导出的视频帧率
+        const fps = 30;//导出的视频帧率，提高到30帧以获得更流畅的效果
         const timeslice = 10;//捕获数据时间间隔
-        const bitRate = 5000000;//码率
+        const bitRate = 20000000;//码率设置为20Mbps以保持原始画质
         // 详见 https://juejin.cn/post/7005113182247190541
 
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -79,7 +79,7 @@
 
         // safari(iOS)支持mp4导出，部分chrome(Android)支持webm，可能需要转换一下
         const mimeTypeList = [
-            ['video/mp4; codecs=avc1', 'mp4'],
+            ['video/mp4; codecs=avc3', 'mp4'],
             ['video/mp4', 'mp4'],
             ['video/webm; codecs=vp9', 'webm'],
             ['video/webm', 'webm']
@@ -123,34 +123,38 @@
         // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/captureStream
         const allChunks = [];
         const stream = cvs.captureStream(fps);
-        const recorder = new MediaRecorder(stream, mimeType.opt);
-        recorder.onstop = (e) => {
-            console.log("--录制完全结束，开始生成文件--");
-            const fullBlob = new Blob(allChunks, { type: mimeType.opt.mimeType });
-            const downloadUrl = window.URL.createObjectURL(fullBlob);
+        let recorder;
 
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = downloadUrl;
-            // 生成带随机数的文件名
-            link.download = `${vidName}_watermarked_${new Date().getTime()}.${mimeType.ext}`;
+        const setupRecorder = () => {
+            recorder = new MediaRecorder(stream, mimeType.opt);
+            recorder.onstop = (e) => {
+                console.log("--录制完全结束，开始生成文件--");
+                const fullBlob = new Blob(allChunks, { type: mimeType.opt.mimeType });
+                const downloadUrl = window.URL.createObjectURL(fullBlob);
 
-            document.body.appendChild(link);
-            link.click();
+                const link = document.createElement('a');
+                link.style.display = 'none';
+                link.href = downloadUrl;
+                // 生成带随机数的文件名
+                link.download = `${vidName}_watermarked_${new Date().getTime()}.${mimeType.ext}`;
 
-            // 清理工作
-            setTimeout(() => {
-                link.remove();
-                window.URL.revokeObjectURL(downloadUrl);
-                allChunks.length = 0; // 清空数据，为下一次录制做准备
-                console.log("--下载流程结束--");
-            }, 100);
-        };
-        recorder.ondataavailable = e => {
-            allChunks.push(
-                e.data
-            );
+                document.body.appendChild(link);
+                link.click();
+
+                // 清理工作
+                setTimeout(() => {
+                    link.remove();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    console.log("--下载流程结束--");
+                }, 100);
+            };
+            recorder.ondataavailable = e => {
+                allChunks.push(
+                    e.data
+                );
+            }
         }
+        setupRecorder();
         let vidName = "unNamed";
         let startTime = 0;
         let recStartTime = 0;
@@ -164,6 +168,9 @@
 
             info.style.color = "red";
 
+            // 重新初始化录制器，以确保获取最新的 canvas 分辨率
+            setupRecorder();
+            allChunks.length = 0; // 清空数据，为下一次录制做准备
             recorder.start(timeslice);
             stopRec.disabled = false;
             startRec.disabled = true;
@@ -201,6 +208,9 @@
             requestAnimationFrame(renderLoop);
 
             ctx.clearRect(0, 0, cvs.width, cvs.height);
+            // 使用高质量图像绘制设置
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(vid, 0, 0, cvs.width, cvs.height);
             const curTime = new Date(startTime + vid.currentTime * 1000).format("yyyy-MM-dd hh:mm:ss");
             const curTextBBox = ctx.measureText(curTime);
